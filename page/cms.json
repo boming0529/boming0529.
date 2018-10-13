@@ -1,0 +1,7 @@
+{
+    "#": "page/homepage",
+    "": "page/homepage",
+    "#home": "page/homepage",
+    "#404": "page/notfound404",
+    "#post_demo": "post/demo"
+}
