@@ -9,8 +9,8 @@ function getPageTemplate(path, data) {
 
 var handle_link = function (type) {
     $(type).on('click', function (event) {
-        var hash = event.currentTarget.hash;
         $.get('page/cms.json').then(function (jsondata) {
+            var hash = event.currentTarget.hash;
             if (hash) {
                 var path = jsondata[hash]
                 getPageTemplate(path, {}).then(function (result) {
@@ -32,12 +32,12 @@ $(function () {
         getPageTemplate(path, {}).then(function (result) {
             var d = $.Deferred();
             init();
-            $("main").html(result);
+            $("main").html(result);init();
             d.resolve()
             return d.promise();
-        }).then(function () {
+        }).then(function() {
             handle_link('a');
-        });
+        })
     })
 
 });
