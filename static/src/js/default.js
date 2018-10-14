@@ -1,44 +1,79 @@
-function getTemplate(name, data) {
+function getTemplate(path, data) {
     var d = $.Deferred();
-    $.get('sharelayout/' + name + '.html', function (response) {
+    $.get(path + '.html', function (response) {
         var template = Handlebars.compile(response);
         d.resolve(template(data))
     });
     return d.promise();
 }
 
-var headContent = function () {
-    let data = {
-        title: "Boming Blog",
-        CustomStyle: `<link href="static/src/css/clean-blog.min.css" rel="stylesheet">`
+var ajaxhandle = function (inarg, outarg) {
+    return getTemplate(inarg.path, inarg.data).then(
+        function (content) {
+            return new Promise(function (resolve) {
+                $.extend(outarg, {
+                    content: content
+                });
+                resolve(outarg);
+            })
+        }
+    )
+}
+
+var ajaxhead = () => {
+    let inarg = {
+        path: 'sharelayout/default',
+        data: {
+            title: "Boming Blog",
+            CustomStyle: `<link href="static/src/css/clean-blog.min.css" rel="stylesheet">`
+        }
     }
-    getTemplate('default', data).then(function (result) {
-        $("head").html(result);
-    });
+    let outarg = {
+        selector: "head",
+    }
+    return ajaxhandle(inarg, outarg);
 };
 
-var headerContent = function () {
-    getTemplate('header', {}).then(function (result) {
-        $("header").addClass('masthead').html(result);
-    });
+var ajaxheader = () => {
+    let inarg = {
+        path: 'sharelayout/header',
+        data: {}
+    }
+    let outarg = {
+        selector: "header",
+        classname: "masthead",
+    }
+    return ajaxhandle(inarg, outarg);
 };
 
-var menuContent = function () {
-    getTemplate('menu', {}).then(function (result) {
-        $("nav").html(result);
-    });
+var ajaxmenu = () => {
+    let inarg = {
+        path: 'sharelayout/menu',
+        data: {}
+    }
+    let outarg = {
+        selector: "nav",
+    }
+    return ajaxhandle(inarg, outarg);
 };
 
-var footerContent = function () {
-    getTemplate('footer', {}).then(function (result) {
-        $("footer").html(result);
-    });
+var ajaxContent = () => {
+    let inarg = {
+        path: 'sharelayout/footer',
+        data: {}
+    }
+    let outarg = {
+        selector: "footer",
+    }
+    return ajaxhandle(inarg, outarg);
 };
 
+var renderHTML = function (selector, content, classname = '') {
+    $(selector).addClass(classname).html(content);
+}
 
-var init = function() {
-    headContent();
-    headerContent();
-    menuContent();
-    footerContent();
+var total_render = function (other) {
+    let origin = [ajaxhead(), ajaxheader(), ajaxmenu(), ajaxContent()]
+    other ? origin.push(other) : origin
+    return Promise.all(origin)
 }

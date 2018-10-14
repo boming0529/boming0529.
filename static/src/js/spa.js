@@ -1,20 +1,11 @@
-function getPageTemplate(path, data) {
-    var d = $.Deferred();
-    $.get(path + '.html', function (response) {
-        var template = Handlebars.compile(response);
-        d.resolve(template(data))
-    });
-    return d.promise();
-}
-
 var handle_link = function (type) {
     $(type).on('click', function (event) {
         $.get('page/cms.json').then(function (jsondata) {
             var hash = event.currentTarget.hash;
             if (hash) {
                 var path = jsondata[hash]
-                getPageTemplate(path, {}).then(function (result) {
-                    $("main").html(result);
+                ajaxmain(path).then(function (item) {
+                    renderHTML(item.selector, item.content, item.hasOwnProperty('classname') ? item.classname : '')
                     handle_link('main a');
                 });
             }
@@ -22,6 +13,16 @@ var handle_link = function (type) {
     });
 }
 
+var ajaxmain = (path) => {
+    let inarg = {
+        path: path,
+        data: {}
+    }
+    let outarg = {
+        selector: "main",
+    }
+    return ajaxhandle(inarg, outarg);
+};
 
 $(function () {
     $.get('page/cms.json').then(function (jsondata) {
@@ -29,15 +30,13 @@ $(function () {
         if (!path) {
             path = jsondata["#404"]
         }
-        getPageTemplate(path, {}).then(function (result) {
-            var d = $.Deferred();
-            init();
-            $("main").html(result);init();
-            d.resolve()
-            return d.promise();
-        }).then(function() {
+        total_render(ajaxmain(path)).then(function (value) {
+            for (index in value) {
+                let item = value[index]
+                renderHTML(item.selector, item.content, item.hasOwnProperty('classname') ? item.classname : '')
+            }
             handle_link('a');
-        })
-    })
+        });
+    });
 
 });
