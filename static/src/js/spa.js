@@ -1,15 +1,13 @@
 var handle_link = function (type) {
     $(type).on('click', function (event) {
-        $.get('page/cms.json').then(function (jsondata) {
-            var hash = event.currentTarget.hash;
-            if (hash) {
-                var path = jsondata[hash]
-                ajaxmain(path).then(function (item) {
-                    renderHTML(item.selector, item.content, item.hasOwnProperty('classname') ? item.classname : '')
-                    handle_link('main a');
-                });
-            }
-        })
+        var hash = event.currentTarget.hash;
+        if (hash && hash != location.hash) {     
+            var path = window.jsondata[hash]
+            ajaxmain(path).then(function (item) {
+                renderHTML(item.selector, item.content, item.hasOwnProperty('classname') ? item.classname : '')
+                handle_link('main a');
+            });
+        }
     });
 }
 
@@ -26,6 +24,7 @@ var ajaxmain = (path) => {
 
 $(function () {
     $.get('page/cms.json').then(function (jsondata) {
+        window.jsondata = jsondata;
         var path = jsondata[location.hash]
         if (!path) {
             path = jsondata["#404"]
